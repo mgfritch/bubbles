@@ -11,15 +11,18 @@ from mgr_module import MgrModule
 
 from .fs import CephFS
 from .nfs import NFS
+from .orch import Orchestrator
 from .osd import OSD
 
 
 class CephController:
     fs: CephFS
     nfs: NFS
+    orch: Orchestrator
     osd: OSD
 
     def __init__(self, mgr: MgrModule) -> None:
         self.fs = CephFS(mgr)
         self.nfs = NFS(mgr)
+        self.orch = Orchestrator(mgr)
         self.osd = OSD(mgr)

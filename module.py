@@ -1,5 +1,5 @@
 # bubbles - a simplified management UI for Ceph
-# Copyright (C) 2021 SUSE, LLC
+# Copyright (C) 2021-2022 SUSE, LLC
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ from mgr_util import build_url
 
 import bubbles.extras
 from bubbles.backend.api import auth, cluster, host, services, storage, users
-from bubbles.backend.api.ceph import fs, nfs, osd
+from bubbles.backend.api.ceph import fs, nfs, orch, osd
 from bubbles.bubbles import Bubbles
 
 
@@ -92,6 +92,7 @@ class BubblesModule(MgrModule):
         # ceph related endpoints
         self.api.include_router(fs.router)
         self.api.include_router(nfs.router)
+        self.api.include_router(orch.router)
         self.api.include_router(osd.router)
 
         staticdir = os.path.join(
