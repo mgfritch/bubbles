@@ -12,7 +12,7 @@ from typing import List, NewType, Optional
 from mgr_module import MgrModule, MonCommandFailed
 from pydantic.tools import parse_obj_as
 
-from bubbles.backend.models.ceph.orch import ServiceModel
+from bubbles.backend.models.ceph.orch import DaemonModel, ServiceModel
 
 logger = logging.getLogger(__name__)
 
@@ -50,3 +50,33 @@ class Orchestrator:
             raise Error(e)
 
         return parse_obj_as(List[ServiceModel], json.loads(out))
+
+    def ps(
+        self,
+        hostname: Optional[str] = None,
+        service_name: Optional[str] = None,
+        daemon_type: Optional[str] = None,
+        daemon_id: Optional[str] = None,
+        refresh: bool = False,
+    ) -> List[DaemonModel]:
+        cmd: dict = {
+            "prefix": "orch ps",
+            "format": "json",
+        }
+        if hostname:
+            cmd["hostname"] = hostname
+        if service_name:
+            cmd["service_name"] = service_name
+        if daemon_type:
+            cmd["daemon_type"] = daemon_type
+        if daemon_id:
+            cmd["daemon_id"] = daemon_id
+        if refresh:
+            cmd["refresh"] = refresh
+
+        try:
+            _, out, _ = self._mgr.check_mon_command(cmd)
+        except MonCommandFailed as e:
+            raise Error(e)
+
+        return parse_obj_as(List[DaemonModel], json.loads(out))

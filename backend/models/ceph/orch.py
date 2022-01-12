@@ -24,3 +24,13 @@ class ServiceModel(BaseModel):
     service_name: str
     placement: dict
     status: ServiceStatus
+
+
+class DaemonModel(BaseModel):
+    daemon_type: str
+    daemon_id: str
+    daemon_name: str
+    service_name: str
+    hostname: str
+    version: str
+    ports: Optional[List[int]]
