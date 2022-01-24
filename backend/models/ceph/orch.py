@@ -34,3 +34,9 @@ class DaemonModel(BaseModel):
     hostname: str
     version: str
     ports: Optional[List[int]]
+
+
+class ServiceRequest(BaseModel):
+    service_type: str
+    service_id: Optional[str]
+    placement: str

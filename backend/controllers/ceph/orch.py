@@ -9,10 +9,15 @@ import json
 import logging
 from typing import List, NewType, Optional
 
+import yaml
 from mgr_module import MgrModule, MonCommandFailed
 from pydantic.tools import parse_obj_as
 
-from bubbles.backend.models.ceph.orch import DaemonModel, ServiceModel
+from bubbles.backend.models.ceph.orch import (
+    DaemonModel,
+    ServiceModel,
+    ServiceRequest,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -80,3 +85,28 @@ class Orchestrator:
             raise Error(e)
 
         return parse_obj_as(List[DaemonModel], json.loads(out))
+
+    def apply(
+        self,
+        req: ServiceRequest,
+        dry_run: bool = False,
+        no_overwrite: bool = False,
+    ) -> str:
+        inbuf = yaml.dump(dict(req))
+
+        cmd: dict = {
+            "prefix": "orch apply",
+            "inbuf": inbuf,
+        }
+
+        if dry_run:
+            cmd["dry_run"] = dry_run
+        if no_overwrite:
+            cmd["no_overwrite"] = no_overwrite
+
+        try:
+            _, out, _ = self._mgr.check_mon_command(cmd)
+        except MonCommandFailed as e:
+            raise Error(e)
+
+        return out

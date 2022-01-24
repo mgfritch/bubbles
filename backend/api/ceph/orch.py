@@ -12,7 +12,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from bubbles.backend.api import jwt_auth_scheme
 from bubbles.backend.controllers.ceph.orch import Error
-from bubbles.backend.models.ceph.orch import DaemonModel, ServiceModel
+from bubbles.backend.models.ceph.orch import (
+    DaemonModel,
+    ServiceModel,
+    ServiceRequest,
+)
 from bubbles.bubbles import Bubbles
 
 router = APIRouter(prefix="/ceph/orch", tags=["ceph"])
@@ -65,6 +69,31 @@ async def ps(
             daemon_type=daemon_type,
             daemon_id=daemon_id,
             refresh=refresh,
+        )
+    except Error as e:
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@router.post(
+    "/service",
+    name="Apply an Orchestrator ServiceSpec",
+    response_model=str,
+)
+async def apply(
+    request: Request,
+    req: ServiceRequest,
+    dry_run: bool = False,
+    no_overwrite: bool = False,
+    _: Callable = Depends(jwt_auth_scheme),
+) -> str:
+    bubbles: Bubbles = request.app.state.bubbles
+    try:
+        return bubbles.ctrls.ceph.orch.apply(
+            req=req,
+            dry_run=dry_run,
+            no_overwrite=no_overwrite,
         )
     except Error as e:
         raise HTTPException(
